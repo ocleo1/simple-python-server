@@ -1,4 +1,5 @@
 from routes.foobar import foobar
+from routes.ping import ping
 
 
 __all__ = ["routes"]
@@ -37,5 +38,6 @@ routes = {
 			"/": foobar,
 			"hello": foobar
 		}
-	}
+	},
+	"ping": ping
 }

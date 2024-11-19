@@ -72,6 +72,11 @@ class Router(BaseHTTPRequestHandler):
 			http_status, result = route_handler(method, self.__params, body, parsed_url=parsed_url)
 			self.__write_response(http_status, result)
 
+	def log_request(self, code='-', size='-'):
+		if self.path == '/ping':
+			return
+		super().log_request(code, size)
+
 	def do_GET(self):
 		self.__handle("GET")
 

@@ -1,0 +1,12 @@
+**/__pycache__
+venv
+*.md
+*.yml
+*.sh
+.vscode
+.DS_Store
+.env
+.env.*
+.gitignore
+Dockerfile
+LICENSE
