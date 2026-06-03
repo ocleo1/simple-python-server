@@ -3,7 +3,7 @@ import unittest
 from io import BytesIO
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 from urllib.parse import urlparse, unquote, ParseResult
 from functools import reduce
 from inspect import isfunction
@@ -39,12 +39,17 @@ class Router(BaseHTTPRequestHandler):
 			data = bytes(result, charset)
 			self.wfile.write(data)
 
-	def __router(self, parsed_url: ParseResult) -> Callable | None:
+	_NOT_FOUND = object()
+
+	def __router(self, parsed_url: ParseResult) -> Callable | None | object:
 		self.__params = list()
-		path_chunks = parsed_url.path.split('/')
+		path = parsed_url.path
+		path_chunks = [] if path == '/' else path[1:].split('/')
 		def reducer(acc: Dict | Callable, curr: str):
-			if isfunction(acc):
-				return acc
+			if acc is Router._NOT_FOUND:
+				return Router._NOT_FOUND
+			if not isinstance(acc, Dict):
+				return Router._NOT_FOUND
 			handler = acc.get(curr)
 			if handler is not None:
 				return handler
@@ -52,21 +57,24 @@ class Router(BaseHTTPRequestHandler):
 			if handler is not None:
 				self.__params.append(curr)
 				return handler
-			handler = acc.get("/")
-			if handler is not None:
-				return handler
-			return acc
-		func = reduce(reducer, path_chunks[1:], routes)
+			return Router._NOT_FOUND
+		func = reduce(reducer, path_chunks, routes)
+		if func is Router._NOT_FOUND:
+			return Router._NOT_FOUND
 		if isinstance(func, Dict):
-			func = func.get('/')
+			func = func.get('/') if '/' in func else Router._NOT_FOUND
+		if func is Router._NOT_FOUND:
+			return Router._NOT_FOUND
 		if isfunction(func):
 			return func
 		return None
-	
+
 	def __handle(self, method: str, body = None):
 		parsed_url = urlparse(self.path)
 		route_handler = self.__router(parsed_url)
-		if route_handler is None:
+		if route_handler is Router._NOT_FOUND:
+			self.__write_response(HTTPStatus.NOT_FOUND, None)
+		elif route_handler is None:
 			self.__write_response(HTTPStatus.INTERNAL_SERVER_ERROR, None)
 		else:
 			http_status, result = route_handler(method, self.__params, body, parsed_url=parsed_url)
@@ -155,6 +163,27 @@ class TestRouter(unittest.TestCase):
 		handler.send_header.assert_any_call("Content-type", "text/plain;charset=utf-8")
 		handler.end_headers.assert_called_once()
 		self.assertEqual(handler.wfile.getvalue(), b"run")
+
+	def test_do_GET_internal_server_error(self):
+		request = b"GET /bad HTTP/1.1\r\nHost: localhost\r\n\r\n"
+
+		handler = self.__create(request)
+		with patch('router.routes', {**__import__('routes').routes, 'bad': 'not-a-function'}):
+			handler.do_GET()
+
+		self.assertEqual(handler.send_response.call_count, 1)
+		handler.send_response.assert_called_with(HTTPStatus.INTERNAL_SERVER_ERROR)
+		handler.end_headers.assert_called_once()
+
+	def test_do_GET_not_found(self):
+		request = b"GET /world HTTP/1.1\r\nHost: localhost\r\n\r\n"
+
+		handler = self.__create(request)
+		handler.do_GET()
+
+		self.assertEqual(handler.send_response.call_count, 1)
+		handler.send_response.assert_called_with(HTTPStatus.NOT_FOUND)
+		handler.end_headers.assert_called_once()
 
 	def test_do_POST_foo_run_hello(self):
 		request = b"POST /foo/run/hello HTTP/1.1\r\nHost: localhost\r\nContent-Type: text/plain;charset=utf-8\r\n\r\n{hello:world}"
