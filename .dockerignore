@@ -10,3 +10,4 @@ venv
 .gitignore
 Dockerfile
 LICENSE
+logs

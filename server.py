@@ -3,8 +3,9 @@
 import optparse
 from http.server import HTTPServer
 
-from router import Router
 from config import HOSTNAME, PORT
+from helpers.logger import logger
+from router import Router
 
 
 if __name__ == '__main__':
@@ -22,7 +23,7 @@ if __name__ == '__main__':
 	args, _ = parser.parse_args()
 
 	web_server = HTTPServer((args.hostname, int(args.port)), Router)
-	print("Server started http://%s:%s" % (args.hostname, args.port))
+	logger.info("Server started http://%s:%s" % (args.hostname, args.port))
 
 	try:
 		web_server.serve_forever()
@@ -30,4 +31,4 @@ if __name__ == '__main__':
 		pass
 
 	web_server.server_close()
-	print("Server stopped.")
+	logger.info("Server stopped.")

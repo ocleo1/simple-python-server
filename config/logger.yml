@@ -1,0 +1,36 @@
+version: 1
+disable_existing_loggers: true
+formatters:
+  console:
+    format: '%(message)s'
+  simple:
+    format: '%(asctime)s %(levelname)s {path: %(pathname)s Line_No: %(lineno)d} %(message)s'
+handlers:
+  console:
+    class: logging.StreamHandler
+    level: DEBUG
+    formatter: console
+    stream: ext://sys.stdout
+  file:
+    class: logging.handlers.RotatingFileHandler
+    level: DEBUG
+    filename: logs/debug.log
+    maxBytes: 20971520 # 1024 * 1024 * 20
+    backupCount: 50
+    formatter: simple
+    encoding: utf8
+loggers:
+  simple-python-server_console:
+    level: DEBUG
+    handlers: [console]
+    propagate: no
+  simple-python-server:
+    level: DEBUG
+    handlers: [file]
+    propagate: no
+root:
+  level: DEBUG
+  handlers: [console,file]
+
+# https://stackoverflow.com/questions/49012123/python3-logging-yaml-configuration
+# https://blog.csdn.net/weixin_30888707/article/details/101585117
