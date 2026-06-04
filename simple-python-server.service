@@ -1,0 +1,19 @@
+[Unit]
+Description=Simple Python HTTP Server
+After=network.target
+
+[Service]
+Type=simple
+User=nobody
+Group=nobody
+WorkingDirectory=/srv/simple-python-server
+EnvironmentFile=/srv/simple-python-server/.env
+ExecStart=/srv/simple-python-server/.venv/bin/python3 server.py
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=simple-python-server
+
+[Install]
+WantedBy=multi-user.target
