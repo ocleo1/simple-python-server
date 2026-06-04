@@ -1,5 +1,7 @@
 **/__pycache__
-venv
+.venv
+.uv-cache
+*.pyc
 *.md
 *.yml
 *.sh
