@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.simple-python-server</string>
+
+    <!-- uv (default): dependencies are managed automatically -->
+    <key>ProgramArguments</key>
+    <array>
+        <string>/usr/local/bin/uv</string>
+        <string>run</string>
+        <string>server.py</string>
+    </array>
+
+    <!-- pip alternative: create a venv first, then swap ProgramArguments to:
+    <key>ProgramArguments</key>
+    <array>
+        <string>/usr/local/opt/simple-python-server/.venv/bin/python3</string>
+        <string>server.py</string>
+    </array>
+
+    Setup:
+        python3 -m venv /usr/local/opt/simple-python-server/.venv
+        /usr/local/opt/simple-python-server/.venv/bin/pip install -r requirements.txt
+    -->
+
+    <key>WorkingDirectory</key>
+    <string>/usr/local/opt/simple-python-server</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PORT</key>
+        <string>8888</string>
+        <key>HOSTNAME</key>
+        <string>127.0.0.1</string>
+    </dict>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>KeepAlive</key>
+    <dict>
+        <key>SuccessfulExit</key>
+        <false/>
+    </dict>
+
+    <key>StandardOutPath</key>
+    <string>/usr/local/opt/simple-python-server/logs/stdout.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>/usr/local/opt/simple-python-server/logs/stderr.log</string>
+</dict>
+</plist>
