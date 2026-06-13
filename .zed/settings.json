@@ -1,0 +1,6 @@
+{
+    "tab_size": 4,
+    "hard_tabs": false,
+    "preferred_line_ending": "unix",
+    "ensure_final_newline_on_save": true
+}
