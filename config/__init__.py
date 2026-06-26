@@ -1,6 +1,9 @@
 import os
 import yaml
+from dotenv import load_dotenv
 from logging.config import dictConfig
+
+load_dotenv()
 
 HOSTNAME = os.environ.get("HOSTNAME", "0.0.0.0")
 PORT = os.environ.get("PORT", "8888")
